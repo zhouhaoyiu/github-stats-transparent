@@ -8,6 +8,11 @@ import aiohttp
 
 from github_stats import Stats
 
+MIN_LANG_CARD_HEIGHT = 210
+LANG_CARD_BASE_HEIGHT = 130
+LANG_CARD_ROW_HEIGHT = 18
+LANG_CARD_FOREIGN_OBJECT_OFFSET = 34
+
 
 ################################################################################
 # Helper Functions
@@ -60,6 +65,15 @@ async def generate_languages(s: Stats) -> None:
     lang_list = ""
     sorted_languages = sorted((await s.languages).items(), reverse=True,
                               key=lambda t: t[1].get("size"))
+    dynamic_height = max(
+        MIN_LANG_CARD_HEIGHT,
+        LANG_CARD_BASE_HEIGHT + (len(sorted_languages) * LANG_CARD_ROW_HEIGHT)
+    )
+    foreign_object_height = dynamic_height - LANG_CARD_FOREIGN_OBJECT_OFFSET
+    output = re.sub(r'(<svg width="360" height=")\d+(" xmlns=)',
+                    rf"\g<1>{dynamic_height}\2", output)
+    output = re.sub(r'(<foreignObject x="21" y="17" width="318" height=")\d+(">)',
+                    rf"\g<1>{foreign_object_height}\2", output)
     delay_between = 150
     for i, (lang, data) in enumerate(sorted_languages):
         color = data.get("color")
