@@ -60,6 +60,12 @@ async def generate_languages(s: Stats) -> None:
     lang_list = ""
     sorted_languages = sorted((await s.languages).items(), reverse=True,
                               key=lambda t: t[1].get("size"))
+    dynamic_height = max(210, 130 + (len(sorted_languages) * 18))
+    foreign_object_height = dynamic_height - 34
+    output = re.sub(r'(<svg width="360" height=")\d+(" xmlns=)',
+                    rf"\g<1>{dynamic_height}\2", output)
+    output = re.sub(r'(<foreignObject x="21" y="17" width="318" height=")\d+(">)',
+                    rf"\g<1>{foreign_object_height}\2", output)
     delay_between = 150
     for i, (lang, data) in enumerate(sorted_languages):
         color = data.get("color")
